@@ -1,8 +1,10 @@
 ## Aula 1
 
-sep - separador.
-end - coloca no final do print.
-\n - é um caractere especial, que faz com que o novo prompt comece em uma nova linha.
+`sep` - separador.
+
+`end` - coloca no final do print.
+
+`\n` - é um caractere especial, que faz com que o novo prompt comece em uma nova linha.
 
 ````
 subst = "Python"
