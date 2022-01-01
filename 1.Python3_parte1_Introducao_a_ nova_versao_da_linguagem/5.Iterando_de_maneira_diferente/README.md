@@ -237,3 +237,171 @@ Digite um número entre 1 e 100:
 Perfeito! O número digitado era incorreto, então fomos para a próxima tentativa.
 
 Então vimos aqui o **`break`**, que acaba, encerra o laço; e o **`continue`**, que acaba, encerra a iteração, continuando para a próxima.
+
+
+
+
+
+### Para saber mais: Formatação de strings
+
+Segue o link da documentação que mencionei no video, nele tem vários exemplos de formatação:
+
+https://docs.python.org/3/library/string.html#formatexamples
+
+Nesse vídeo veremos um pouco mais sobre interpolação de strings. Para isso, vamos utilizar o console do Python 3.
+
+No capítulo anterior, fizemos uma interpolação semelhante a essa:
+
+```
+>>> print("Tentativa {} de {}".format(1, 3))
+```
+
+Essa interpolação é útil para formatação de strings, quando temos um texto  muito grande e precisamos inserir valores no meio dele, ao invés de  ficarmos concatenando, trabalhando com várias strings separadas.
+
+Mas a função **`format`** tem outras  utilidades, então veremos mais alguns detalhes sobre essa função. O  primeiro detalhe que veremos é que os parâmetros podem ser invertidos na string. Podemos dizer que queremos nas primeiras chaves o segundo  parâmetro da função, e o primeiro parâmetro nas segundas chaves.
+
+Fazemos isso passando o **índice do parâmetro** dentro das chaves. O primeiro parâmetro tem índice **0**, o segundo **1**, e daí por diante. Logo, basta passar o índice 1 nas primeiras chaves e o 0 nas segundas chaves:
+
+```
+>>> print("Tentativa {1} de {0}".format(1, 3))
+Tentativa 3 de 1
+```
+
+## Formatação de floats
+
+Agora vamos trocar o exemplo, e formatar um valor em reais, por exemplo:
+
+```
+>>> print("R$ {}".format(1.59))
+R$ 1.59
+```
+
+Só que um valor pode ter vários tamanhos e até duas casas decimais, por exemplo:
+
+```
+1.59
+45.9
+1234.97
+```
+
+O ideal é que esses valores sempre tenham a mesma formatação:
+
+```
+   1.59
+  45.9
+1234.97
+```
+
+Então precisamos preencher as lacunas, os espaços em branco. E a função **`format`** faz isso para nós. Primeiro precisamos dizer para ela que estamos recebendo um valor do tipo **float**, passando **`:f`** dentro das chaves da string:
+
+```
+>>> print("R$ {:f}".format(1.59))
+R$ 1.590000
+```
+
+Podemos  reparar que só de dizer que estamos passando um float, a formatação já  muda, mas podemos manipulá-la, modificá-la, dizendo quantos números  devem vir antes e depois do ponto. Queremos que após o ponto tenha  apenas 2 números, logo:
+
+```
+>>> print("R$ {:.2f}".format(1.59))
+R$ 1.59
+```
+
+Podemos testar passando um número de apenas uma casa decimal:
+
+```
+>>> print("R$ {:.2f}".format(1.5))
+R$ 1.50
+```
+
+Ótimo, agora vamos testar com um número maior:
+
+```
+>>> print("R$ {:.2f}".format(1.5))
+R$ 1.50
+>>> print("R$ {:.2f}".format(1234.50))
+R$ 1234.50
+```
+
+Mas queremos  que o ponto fique sempre no mesmo local, ou seja, ele deve ser o quinto  caractere. Para essa formatação, precisamos dizer quantos caracteres o  número terá no máximo, no nosso caso são 7 (4 números, mais o ponto,  mais as duas casas decimais). Então vamos passar o valor 7 dentro das  chaves também:
+
+```
+>>> print("R$ {:7.2f}".format(1234.50))
+R$ 1234.50
+>>> print("R$ {:7.2f}".format(1.5))
+R$    1.50
+```
+
+Ou seja, dos 7 caracteres, os três últimos serão o ponto mais dois números das casas decimais.
+
+Agora espaços ficam na frente quando um número for menor! Deixando o  ponto sempre como quinto caractere. Se quisermos preencher os espaços em branco com zeros, é só passar um 0 antes do 7:
+
+```
+>>> print("R$ {:07.2f}".format(1.5))
+R$ 0001.50
+```
+
+## Formatação de inteiros
+
+Conseguimos formatar números inteiros também, não só números flutuantes. Para números inteiros, passamos a letra **`d`**:
+
+```
+>>> print("R$ {:07d}".format(4))
+R$ 0000004
+```
+
+Podemos usar isso para formatar uma data:
+
+```
+>>> print("Data {:02d}/{:02d}".format(9, 4))
+Data 09/04
+>>> print("Data {:02d}/{:02d}".format(19, 11))
+Data 19/11
+```
+
+Não se preocupe em decorar a sintaxe, o importante é saber que no Python  existe a funcionalidade de interpolação de strings, e quando vocês  realmente precisarem usar isso, olhem na [documentação](https://docs.python.org/3/library/string.html#formatexamples).
+
+
+
+### Interpolação - Python 2 vs Python 3
+
+A interpolação de strings também mudou entre o Python 2 e o Python 3. 
+
+Como você já viu, no Python 3 usa-se a função `format` junto com a sintaxe `{}` dentro da string, por exemplo:
+
+```
+"{} {}".format(1, 2)
+```
+
+O Python 2 usava uma sintaxe especial, ao invés do `format` era preciso usar o caractere `%`. Veja o exemplo:
+
+```
+"%d %d" % (1, 2)
+```
+
+Repare também que o `%` também era utilizado dentro da string.
+
+Mais exemplos, sempre comparando o Python 2 com Python 3, existem no link: https://pyformat.info/
+
+Vale a pena ver!
+
+## No Python 3.6+
+
+A partir da [versão 3.6 do Python](https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep498), foi adicionado um novo recurso para realizar a interpolação de strings. Esse recurso é chamado de `f-strings` ou `formatted string literals`. 
+
+Esse recurso funciona da seguinte forma. Vamos imaginar que temos uma variável nome:
+
+```
+>>> nome = 'Matheus'
+>>> print(f'Meu nome é {nome}')
+Meu nome é Matheus
+```
+
+Quando colocamos a letra `f` antes das aspas, informamos ao Python que estamos utilizando uma `f-string`. Dessa forma o Python consegue, em tempo de execução, captar a expressão que está entre chaves (`{ }`) e avaliá-la.
+
+Além de variáveis, podemos passar também de funções e métodos:
+
+```
+>>> nome = 'Matheus'
+>>> print(f'Meu nome é {nome.lower()}')
+Meu nome é matheus
+```
