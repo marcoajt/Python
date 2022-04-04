@@ -1,0 +1,312 @@
+# Atributos privados
+
+Nós criamos atributos e métodos na classe `Conta`, por isso, ela já funciona. Mas ainda está incompleta. 
+
+Falamos anteriormente sobre encapsulamento, no console do PyCharm, importaremos da classe `Conta`. 
+
+```
+>>> from conta import Conta
+
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x102b89128>
+```
+
+Chamamos uma `Conta`, chamando a função construtora `__init__` por baixo dos panos. Com isso, conseguimos acessar os métodos (como `sacar()` ou `deposita()`) para acessar o atributo do objeto. Se quisermos imprimir o saldo, utilizaremos o método `extrato()` ou `saldo()`. No caso, invocaremos o último:
+
+```
+>>> conta.saldo
+55.5
+```
+
+Acessaremos o objeto usando a referência. Com ela, conseguiremos também alterar o saldo da conta: 
+
+```
+>>> conta.saldo = 60.0
+```
+
+Agora, se pedirmos para imprimir o extrato, o valor será atualizado: 
+
+```
+>>> conta.saldo = 60.0
+
+>>> conta.extrato()
+Saldo de 60.0 do titular Nico
+```
+
+Porém, isto não deveria acontecer. O valor do saldo da conta deveria ser alterado a partir do método `deposita()`, localizalizado em `conta.py`: 
+
+```
+def deposita(self, valor):
+    self.saldo += valor
+
+def saca(self, valor):
+    self.saldo -= valor
+```
+
+Se quiséssemos saber o nome de alguém, seria uma falta de educação pegar diretamente o documento de identificação da pessoa, sem pedir autorização. Da mesma forma, seria mais apropriado usarmos um método para identificar o saldo, em vez de acessá-lo diretamente. 
+
+Não podemos acessar o atributo `saldo` do objeto diretamente. Teremos que usar os métodos responsáveis por encapsular o acesso ao objeto.  
+
+Então, para melhorarmos a classe `Conta`, devemos restringir o acesso a `saldo`, tornando-o **privado**, adicionando dois caracteres *underscore* (`__`).    
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular 
+        self.__saldo = saldo
+        self.__limite = limite
+```
+
+Em algumas linguagens como Java, a palavra **private** define o atributo como privado e é chamado como **modificador de visibilidade**. Porém, em Python, foi convencionado o uso `__`. Com isso, nós renomeamos os atributos seguindo uma nomenclatura especial, por exemplo, `numero` passou a se chamar `__numero`.   
+
+Para testar as alterações, reiniciaremos o console e criaremos um novo objeto. 
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10f6f5630>
+```
+
+Tudo continua funcionando corretamente. Em seguida, tentaremos acessar o atributo referente ao saldo. Se você observar, quando digitarmos a referência `conta` no console do Pycharm, o autocomplete já nos oferecerá opções diferentes. 
+
+![sugestões do autocomplete inclui metodos e atributos privados](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/4.1_1_sugest%C3%B5es+do+autocomplete+inclui+metodos+e+atributos+privados.png)
+
+Primeiramente, serão listados três métodos (`extrato`, `saca` e `deposita`), depois, vemos `_Conta_limite`, `_Conta_numero`, `_Conta_saldo`, `_Conta_titular`. Vamos tentar acessar os atributos `__limite` e `__saldo`. 
+
+```
+>>> conta._Conta__limite
+1000.0
+>>> conta._Conta__saldo
+55.5
+```
+
+Nós continuamos a ter acesso aos atributos, ainda que eles tenham mudado de nome — o Python adicionou a classe antecedido por `_`. Ao escrevermos `conta._Conta__limite`, o Python informará ao desenvolvedor que o atributo `__saldo` não deve ser acessado. 
+
+O Python **avisa** que o atributo foi criado para ser usado dentro da classe, por meio dos métodos. Porém, continuaremos a ter acesso aos valores. Mas se o desenvolvedor decidir acessar o atributo igualmente, ele será alertado de que está fazendo algo inapropriado, ou seja, está "brincando com fogo".
+
+A ação de tornar privado o acesso aos atributos, no mundo Orientado a Objetos, chamamos de **encapsulamento**. Com isso, definimos que o acesso deve ocorrer apenas por meio dos métodos. 
+
+A seguir, falaremos mais sobre encapsulamento, mas antes faça os exercícios.
+
+
+
+# Encapsulamento
+
+Continuaremos a falar sobre encapsulamento, um dos conceitos fundamentais da programação Orientada a Objeto. Anteriormente, vimos como proteger os atributos da classe `Conta`, deixando-os privados. 
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular 
+        self.__saldo = saldo
+        self.__limite = limite
+```
+
+O Python não possui uma palavra-chave para tornar um atributo privado — como Java tem o modificador de visibilidade `private`. Porém, foi convencionada uma nomenclatura especial: os dois *underscore* (`__`). Quando `_` é utilizado, o atributo é renomeado pelo Python. Por exemplo, `__conta` passou a se chamar automaticamente `_Conta__saldo`. Desta forma, explicitamos para o desenvolvedor que se trata de um atributo privado. 
+
+No entanto, o assunto encapsulamento vai além dos atributos. Vamos exemplificar isso a seguir, com a criação de duas contas no console do PyCharm: 
+
+```
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10681d588>
+>>> conta2 = Conta(321, "Marco", 100.0, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x1065f0940>
+```
+
+Temos duas referências, cada uma apontando para um objeto diferente. Agora se quisermos transferir dinheiro da conta do Marco (`conta2`) para o Nico (`conta`), como a quantia de R$`10.00` que iremos declara a seguir:
+
+```
+>>> valor = 10.00
+
+>>> conta2.saca(valor)
+
+>>> conta.deposita(valor)
+```
+
+Nós acessamos a conta do Marco para sacar e, depois, a conta do Nico para realizar o depósito. A ação de transferir dinheiro se baseia em tirar o dinheiro de uma conta e depositar em outra. Em seguida, verificaremos o saldo atualizado das duas contas. 
+
+```
+>>> valor = 10.00
+>>> conta2.saca(valor)
+>>> conta.deposita(valor)
+>>> conta.extrato()
+Saldo de 65.5 do titular Nico
+>>> conta2.extrato()
+Saldo de 90.0 do titular Marco
+```
+
+Foi retirado `10.00` do saldo da `conta2`, enquanto o saldo da `conta` passou a ser `65.5`. A transferência foi bem-sucedida, porém, a ação não ficou clara. Nós programamos algo relacionado a nossa conta que deveria estar localizado dentro da classe `Conta`. A essência do OO é deixar o código **organizado**.
+
+No entanto, implementamos a transferência fora da classe. Se quisermos transferir, é melhor deixar todo o código em um único lugar. Como essa operação está relacionada com a conta, iremos colocá-la na `Conta`. Temos um caso que quebra o encapsulamento, porque o comportamento "transferir" está no lugar equivocado. O próximo passo será movê-lo para a classe `Conta`, onde deveria estar, adicionando para o método `transfere()` logo abaixo de `saca()`.
+
+> Sobre a nomenclatura do método, você tem a liberdade para adotar o nome do método com o verbo no infinitivo, adotando o nome `transferir`, desde que os demais métodos sigam o mesmo padrão. 
+
+Dentro do método `transfere()`, vamos passar dois parâmetros: `self` e `valor`, além disso, aproveitaremos o código executado no console para realizar a transferência. 
+
+```
+def transfere(self, valor):
+    conta2.saca(valor)
+    conta.deposita(valor)
+```
+
+Renomearemos as referências: 
+
+- O parâmetro `conta2` estará relacionado com o parâmetro `origem`;
+- Enquanto `conta` se relacionará com `destino`. 
+
+```
+def transfere(self, valor):
+    origem.saca(valor)
+    destino.deposita(valor)
+```
+
+Porém, ainda não criamos as variáveis `origem` e `destino`. Teremos que declará-las dentro do método também. 
+
+```
+def transfere(self, valor, origem, destino):
+    origem.saca(valor)
+    destino.deposita(valor)
+```
+
+Adiante refatoraremos o código, para aprimorá-lo. Agora, iremos testá-lo. No console, vamos adicionar os dados de duas contas
+
+```
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10521b128>
+>>> conta2 = Conta(321, "Marco", 100.0, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10521b390>
+```
+
+Em seguida, executaremos método `transfere()`, utilizando o nome das referências `conta` e `conta2`. Dentro do parênteses, passaremos os valores referentes aos parâmetros `self`, `valor`, `origem` e `destino`. Definiremos que `conta2` é `origem`, enquanto `conta` será `destino`. O valor do `self` não precisa ser incluído.  
+
+```
+>>> conta2.transfere(10.0, conta2, conta)
+>>> conta2.extrato()
+Saldo de 90.0 do titular Marco
+```
+
+Para termos um retorno, executamos o método `extrato()`, desta forma, teremos acesso ao saldo de `conta2` atualizado: `90.0`. 
+
+```
+>>> conta2.transfere(10.0, conta2, conta)
+>>> conta2.extrato()
+Saldo de 90.0 do titular Marco
+>>> conta.extrato()
+Saldo de 65.5 do titular Nico
+```
+
+A quantia que foi retirada de uma conta foi adicionada em outra. Nós conseguimos criar o código do método que está funcionando bem, mas podemos melhorá-lo ainda. Se observarmos o trecho de código, a referência `conta2` aparece duas vezes na linha executada. Porém, se compreendermos com quem cada parâmetro se relaciona, perceberemos que tanto `self` quanto `origem` são equivalentes `conta2`. Como o Python adiciona `self` automaticamente, removeremos o parâmetro `origem` e usaremos `self` como referência antes de `saca()`. A partir do `self`, além de acessarmos um atributo, poderemos executar um método também. 
+
+Ao digitarmos `self.` veremos que o *autocomplete* disponilizará todos os métodos, assim como os atributos. No caso, executaremos o método `saca()`.  
+
+```
+def transfere(self, valor, destino):
+    self.saca(valor)
+    destino.deposita(valor)
+```
+
+Chamamos um método utilizando o `self`, em seguida, testaremos o código. Agora, `conta2` não será usada como referência equivalente ao parâmetro `origem`.  No console, executaremos a seguinte linha:
+
+```
+>>> conta2.transfere(10.0, conta)
+```
+
+Da `conta2`, vamos transferir `10.0` para `conta` — seria o significado da frase escrita com a sintaxe do Python. Imprimiremos o extrato de `conta2` e veremos se o saldo foi atualizado. 
+
+```
+>>> conta2.transfere(10.0, conta)
+>>> conta2.extrato()
+Saldo de 90.0 do titular Marco
+transfere()
+```
+
+# Mãos na massa: Atributos privados e transferência de valores entre contas
+
+Atualmente, conseguimos mudar o valor dos atributos da nossa classe. Por exemplo, conseguimos mudar o saldo da conta simplesmente atribuindo um novo valor a ele:
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x7fa29f59a518>
+>>> conta.saldo = 10000
+>>> conta.extrato()
+Saldo de 10000 do titular Nico
+```
+
+Mas o saldo da conta só deve ser modificado através dos métodos **deposita** e **saca**. Então, para avisar ao desenvolvedor que ele não deve alterar o valor dos atributos acessando-os diretamente, torne-os **privados**, adicionando dois *underscores* à frente dos atributos, por exemplo:
+
+```
+def __init__(self, numero, titular, saldo, limite):
+    print("Construindo objeto ... {}".format(self))
+    self.__numero = numero
+    self.__titular = titular
+    self.__saldo = saldo
+    self.__limite = limite
+```
+
+**Não esqueça de também modificar os atributos nos métodos.**
+
+## Transferindo um valor de uma conta para outra
+
+Para transferir um valor de uma conta para outra, crie o método **transfere**, que recebe como argumento uma referência do próprio objeto, o **valor** a ser transferido, e a conta de **destino**. Esse método sacará o valor da conta atual e o depositará na conta de destino.
+
+O código da classe **Conta** ficará assim:
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular
+        self.__saldo = saldo
+        self.__limite = limite
+
+    def extrato(self):
+        print("Saldo de {} do titular {}".format(self.__saldo, self.__titular))
+
+    def deposita(self, valor):
+        self.__saldo += valor
+
+    def saca(self, valor):
+        self.__saldo -= valor
+
+    def transfere(self, valor, destino):
+        self.saca(valor)
+        destino.deposita(valor)
+```
+
+No **Python Console**, dentro do próprio PyCharm, teste o código, crie duas contas e transfira um valor de uma conta para outra, visualizando os seus extratos em seguida, por exemplo:
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x7f82af89d048>
+>>> conta2 = Conta(321, "Marcos", 100.0, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x7f82af89d400>
+>>> conta.transfere(10.0, conta2)
+>>> conta.extrato()
+Saldo de 45.5 do titular Nico
+>>> conta2.extrato()
+Saldo de 110.0 do titular Marcos
+```
+
+# Para saber mais: SOLID
+
+Falamos nessa aula sobre a **coesão** que é ligado ao principio de *responsabilidade única*. Aprendemos que uma classe deve ter apenas uma responsabilidade (ou deve ter apenas uma razão para existir). Em outras palavras, ela não deve assumir responsabilidades que não são delas. 
+
+Além desse princípio de *responsabilidade única* existem outras que foram definidos através do Robert C. Martin no início dos anos 2000 e são conhecidos pelo acrônimo **SOLID**:
+
+- **S** - Single responsibility principle
+- **O** - Open/closed principle
+- **L** - Liskov substitution principle
+- **I** - Interface segregation principle
+- **D** - Dependency inversion principle
+
+Na Alura temos cursos específicos sobre o SOLID, mas fique tranquilo, na medida que você avança no mundo OO esses princípios ficam mais claros e fáceis de se entender.

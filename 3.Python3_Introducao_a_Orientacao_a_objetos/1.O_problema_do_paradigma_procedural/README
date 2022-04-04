@@ -1,0 +1,297 @@
+# Dados da conta
+
+Neste curso, você vai precisar ter instalado o Python 3. Feito isto, iremos executá-lo na linha de comando: 
+
+```
+~ nico$ python3 --version
+```
+
+Veremos que a versão foi `3.6.0`. Além disso, utilizaremos PyCharm, que usamos nos outros cursos de Python. Esta IDE nos ajudará a escrever o código Python, mas você pode fazer o mesmo com outro editor de texto de sua preferência (como Atom ou Sublime). 
+
+Após inicializarmos o PyCharm, selecionaremos a opção "Create New Project". 
+
+![create new project PyCharm](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/1.1_1_new+project+Pycharm.png) 
+
+Iremos nomear o projeto como `oo`. 
+
+> > > Certifique-se no momento da criação do arquivo, ele será salvo na versão `3.6.0`. 
+
+Minha sugestão é que você não comece a escrever ainda o código. Primeiramente, siga a nossa explicação.
+
+Até o momento, utilizamos pouco a Orientação a Objetos. Nós vimos superficialmente em cursos anteriores, mas não ressaltamos o uso de OO.
+
+Trabalhamos de uma forma válida, mas sem abordar diretamente este paradigma. Nós escrevemos funções seguindo o paradigma **Procedural**. Nós criamos funções, que recebem parâmetros, realizam algo e dão um retorno. Utilizamos a programação procedural para escrever o nosso programa — e funcionou bem. 
+
+Existem programas complexos feitos assim, o próprio Linux segue esse paradigma. 
+
+Iremos trabalhar com o exemplo de uma conta de banco. Imagine que você tem uma conta e ela possuirá algumas características: saldo, número, agência, titular e um limite. Estas características são comuns às contas bancárias, representá-las no Python Console será nosso objetivo. Começaremos adicionando `numero`: 
+
+```
+>>> numero = 123
+>>> titular = "Nico"
+>>> saldo = 55.0
+>>> limite = 1000.0
+```
+
+Trabalharemos com essas quatro características, mas poderíamos querer representar um sistema com diversas contas. Como representaríamos a segunda conta? Criar diversos números de contas não parece uma boa solução, na verdade, já vimos a forma correta de criar um conjunto de dados. 
+
+Nós queremos representar uma conta que possui um saldo, titular, cada um tendo um valor associado. Trabalharemos com um dicionário, que possui um número. No Console, abaixo de `limite`, adicionaremos `conta = {"numero"}`. O `numero` será seguido do valor `123`.
+
+```
+conta = {"numero": 123}
+```
+
+Depois, incluiremos as chaves `titular`, `saldo` e `limite`. 
+
+```
+>>> numero = 123
+>>> titular = "Nico"
+>>> saldo = 55.0
+>>> limite = 1000.0
+>>> conta = {"numero": 123, "titular": "Nico", "saldo": 55.0, "limite": 1000.0}
+```
+
+Nós conseguimos agrupar todos os dados, que foram representados com a criação da variável `conta`. Agora, se solicitarmos `conta["numero"]`, o retorno será `123`. Ao definirmos qual é a chave, o console irá imprimir o valor referente. 
+
+```
+>>> numero = 123
+>>> titular = "Nico"
+>>> saldo = 55.0
+>>> limite = 1000.0
+>>> conta = {"numero": 123, "titular": "Nico", "saldo": 55.0, "limite": 1000.0}
+>>> conta["numero"]
+123
+>>> conta["saldo"]
+55.0
+```
+
+Agora, se quisermos criar uma segunda conta, basta usar a linha com a variável `conta` como base. 
+
+```
+>>> conta2 = {"numero": 321, "titular": "Marco", "saldo": 100.0, "limite": 1000.0}
+```
+
+Definimos os valores da segunda conta, já agrupados. Porém, precisaremos repetir seguidamente essa linha. A melhor solução será definirmos uma função que encapsule esse código. É o que faremos a seguir. 
+
+O próximo passo será gerar um arquivo chamado `teste` — você pode nomear a sua função da mesma forma. Em seguida, definiremos a função `cria_conta`, reutilizando a linha de `conta2`.
+
+```
+def cria_conta():
+    conta2 = {"numero": 321, "titular": "Marco", "saldo": 100.0, "limite": 1000.0}
+```
+
+No entanto, queremos criar contas com outros valores, para isto, eles serão substituídos por **variáveis**.
+
+```
+def cria_conta(numero, titular, saldo, limite):
+   conta = {"numero": numero, "titular": titular, "saldo": saldo, "limite": limite}
+   return conta
+```
+
+No fim, retornaremos a `conta`. Se executarmos esta função, já teremos um resultado final. Vamos testar se o código esta funcionando. Após reiniciarmos o Console, em seguida, iremos importar do arquivo `teste`: 
+
+```
+>>> from teste import cria_conta
+```
+
+Importamos a função `cria_conta` do módulo `teste`. 
+
+Queremos criar a `conta` usando a função `cria_conta`, ela receberá os seguintes valores referentes a cada uma das chaves: 
+
+```
+>>> conta = cria_conta(123, "Nico", 55.0, 1000.0) 
+```
+
+Nós passamos os quatro parâmetros e a conta será criada. Agora, se acessarmos o valor de `numero` da `conta`, teremos o seguinte retorno: 
+
+```
+>>> from teste import cria_conta
+>>> conta = cria_conta(123, "Nico", 55.0, 1000.0) 
+>>> conta["numero"]
+123
+```
+
+Nós conseguimos agrupar os dados e encapsular a criação dentro de uma função. Porém, ficou trabalhoso saber o nome das chaves. É simples lembrar os nomes delas no código porque elas foram recém-criadas. Mas imagine se a função tivesse sido escrita por outra pessoa. Como saberíamos o nome da chave? 
+
+Iremos considerar que, além de agrupar os dados (ou seja, representar as características), nós também queremos ter funcionalidades com a conta. Tente se lembrar quais são as funcionalidades da sua conta: você deposita e saca dinheiro, verifica qual é o saldo e transfere valores entre diferentes contas. 
+
+Mais adiante, trabalharemos com essas parte de criar outras funcionalidades.
+
+# Dados e comportamento
+
+Vamos apresentar alguns problemas sobre o mundo procedural. Quando o paradigma da Orientação a Objetos nasceu a programação procedural era predominante. A abordagem OO surgiu para resolver os problemas do mundo procedural. Quais são eles? 
+
+Vimos que precisamos lembrar de detalhes como nome das chaves: `conta`, `numero`, `titular`, `limite` e `saldo`. 
+
+```
+>>> from teste import cria_conta
+>>> conta = cria_conta(123, "Nico", 55.0, 1000.0)
+```
+
+O próximo passo é apresentarmos uma conta, descrevemos as suas características, mas ela tem funcionalidades associadas como depositar, sacar, transferir, tirar extrato, enfim, outras ações possíveis. 
+
+Vamos focar nas principais funcionalidades. A cada nova que adicionarmos, criaremos uma nova função. A seguir, definiremos a função `deposita()`:
+
+```
+def deposita(conta, valor): 
+    conta ["saldo"] += valor
+```
+
+Nós adicionamos o `valor` de uma forma simplificada no código, e em vez de repetir `conta["saldo"]`, nós utilizamos `+=`. A função recebeu `conta` e o `valor` como parâmetros. Nós precisamos acessar `conta` por meio da chave `saldo`, que foi definida mais acima.  
+
+Faremos algo semelhante com a função `saca()`, porém, desta vez iremos subtrair usando `-=`.
+
+```
+def saca(conta,valor):
+    conta["saldo"] -= valor
+```
+
+Optamos por fazer uma implementação simples. Em seguida, adicionaremos `extrato()`, que será responsável por imprimir as informações:
+
+```
+def extrato(conta):
+    print("Saldo é {}".format(conta["saldo"]))
+```
+
+O extrato imprime as informações da `conta`, e usando o `print` imprimiremos o saldo exibindo junto com a mensagem `Saldo é`, juntamente com o retorno da função `format()`, passando o `saldo` da conta. 
+
+Vamos testar. Limparemos o console e importamos `cria_conta, deposita, saca, extrato`.
+
+```
+>>> from teste import cria_conta, deposita, saca, extrato
+```
+
+No entanto, teremos um retorno de mensagem de erro:
+
+```
+Traceback (most recent call last):
+File "<input>", line 1, in <module>
+ImportError: cannot import name 'deposita'
+```
+
+Precisamos reiniciar o console. 
+
+![icone atualização do console](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/1.3_1_icone+atualiza%C3%A7%C3%A3o+do+console.png)
+
+Pronto. Criamos novamente a conta, passando os valores.
+
+```
+>>> from teste import cria_conta, deposita, saca, extrato
+>>> conta = cria_conta(123, "Nico", 55.0, 1000.0)
+>>> deposita(conta, 15.0)
+>>> extrato(conta)
+Saldo é 70.0
+>>> saca(conta, 20.0)
+>>> extrato(conta)
+Saldo é 50.0
+```
+
+Acrescentamos algumas funções como `deposita()`, `saca(conta, 20.0)`, `extrato(conta)`, obtendo o retorno `Saldo é 50.0`. 
+
+Nosso código funcionou conforme o esperado. Definimos as características e algumas funcionalidades de uma conta no mundo procedural.
+
+Qual a relação com o mundo de Orientação a Objetos? A ciência deste paradigma é juntar dados e procedimentos, enfim, funcionalidades. O que fizemos agora foi baseado no conhecimento procedural que tínhamos no Python 3. No exemplo da conta, juntamos as características (número, titular, limite, saldo) e funcionalidades (sacar, depositar, tirar extrato). 
+
+Podemos programar Orientação a Objetos no mundo procedural? Não, por quê? Apesar de forçar esta ligação, ela é muito frágil na abordagem procedural.Não é obrigatório colocar as funcionalidades em um lugar só. Poderíamos colocar as funções `deposita()`, `saca()` e `extrato()` em outro arquivo. O importante é organizar o projeto, pois quando ele crescer (este código tem quatro funções, mas imagine um código com mil funções), ficará mais complexo.
+
+Além disso, a ligação é frágil pois persiste o problema de alterar a conta, aumentando o `saldo` sem utilizar a função `deposita()`.
+
+```
+>>> conta["saldo"] = conta["saldo"] + 100.0
+>>> extrato(conta)
+Saldo é 150,0
+```
+
+Se você quer trabalhar com uma conta, o que pode ser feito? Depositar, sacar, tirar extrato. Temos funcionalidades planejadas, mas não precisamos criar uma conta com estas características. Podemos criar contas completamente diferentes.
+
+Por isso, vamos criar uma segunda conta.
+
+```
+>>> conta2 = {"numero": 321, "saldo": 200.0}
+```
+
+Esta nova conta também terá `numero` e `saldo`, mas não terá `limite` e `titular`. Segundo a definição no nosso programa, esta nova conta não será considerada correta.
+
+Se aplicarmos a função `deposita()`, passando como parâmetros `conta2, 200.0` dentro do parênteses, ela funciona. Mas se criarmos uma **conta que não possui** `saldo`, por exemplo, `conta3`: 
+
+```
+ >>> conta3 = {"numero": 321, "limite": 200.0}
+```
+
+Se tentarmos acessar `conta3`, receberemos uma mensagem de erro: 
+
+```
+>>> conta3 = {"numero": 321, "limite": 200.0}
+>>> deposita(conta3, 2000.0)
+
+Traceback (most recent call last):
+    File "<input>", line 1, in <module>
+    File "/Users/caelum/PycharmProjects/oo/teste.py", line 8, in deposita
+        conta["saldo"] += valor
+KeyError: 'saldo'
+```
+
+Reforçamos o que uma conta tem e pode fazer, e que o mundo procedural não oferece essa ligação reforçada.
+
+Precisamos pensar sobre o que escrevemos para não errar ligações frágeis entre funções. Faremos melhorias por meio do paradigma Orientado a Objetos.
+
+
+
+# Mãos na massa: Primeiros passos do projeto
+
+Como nos treinamentos anteriores, iremos utilizar o PyCharm como Python IDE, para nos auxiliar a implementar o código. Você pode baixá-lo [aqui](https://www.jetbrains.com/pycharm/download/).
+
+## Criando o projeto
+
+Crie o projeto **oo**, e se assegure que o Python 3 esteja selecionado no campo **Interpreter**. Com o projeto criado, crie o arquivo **teste.py**.
+
+## Implementando o código
+
+Para implementar o código visto nesta aula, siga os passos abaixo:
+
+**1 -** Crie a função **cria_conta**, que recebe como argumento **numero**, **titular**, **saldo** e **limite**.
+
+**2 -** Dentro dela, crie o dicionário **conta** com os argumentos da função e retorne-o no final da função.
+
+**3 -** Crie a função **deposita**, que recebe como argumento a **conta** e o **valor** e adiciona o valor ao saldo da conta.
+
+**4 -** Crie a função **saca**, que recebe como argumento a **conta** e o **valor** e subtrai o valor do saldo da conta.
+
+**5 -** Crie a função **extrato**, que recebe como argumento a **conta** e imprime o seu saldo.
+
+O código do arquivo **teste.py** ficará assim:
+
+```
+def cria_conta(numero, titular, saldo, limite):
+    conta = {"numero": numero, "titular": titular, "saldo": saldo, "limite": limite}
+    return conta
+
+def deposita(conta, valor):
+    conta["saldo"] += valor
+
+def saca(conta, valor):
+    conta["saldo"] -= valor
+
+def extrato(conta):
+    print("Saldo {}".format(conta["saldo"]))
+```
+
+No **Python Console**, dentro do próprio PyCharm, teste o código, crie uma conta, deposite um valor, visualize o extrato com o saldo incrementado, saque um valor e visualize o extrato com o saldo decrementado, por exemplo:
+
+```
+>>> from teste import cria_conta, deposita, saca, extrato
+>>> conta = cria_conta(123, "Nico", 55.0, 1000.0)
+>>> deposita(conta, 300.0)
+>>> extrato(conta)
+Saldo 355.0
+>>> saca(conta, 100.0)
+>>> extrato(conta)
+Saldo 255.0
+```
+
+# Arquivos do projeto atual        
+
+No link abaixo, você encontra o projeto até o momento atual do curso.
+
+<https://github.com/alura-cursos/Curso-Python-3-Introdu-o-a-Orienta-o-a-objetos/archive/capitulo1.zip>
+

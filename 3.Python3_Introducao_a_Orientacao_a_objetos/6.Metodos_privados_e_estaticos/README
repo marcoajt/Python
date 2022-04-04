@@ -1,0 +1,663 @@
+# Métodos privados
+
+Falamos sobre **propriedades**, como escrever *getters* e *setters* de maneira mais elegante. Na resolução dos exercícios, transformamos os dois *getters* em propriedades adicionando um `@property` em cada, evitando o uso do `get` e `set` . 
+
+```
+@property
+def saldo(self):
+    return self.__saldo
+
+@property
+def titular(self):
+    return self.__titular 
+
+@property
+def limite(self):
+    return self.__limite
+
+@limite.setter
+def limite(self, limite):
+    self.__limite = limite
+
+```
+
+No console, executaremos um exemplo de como criamos uma nova `conta` e conseguimos executar o método `saldo()`: 
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x110839668>
+>>> conta.saldo
+55.5
+```
+
+A seguir, continuaremos falando sobre a classe `Conta`, mas focando no método `saca()`:
+
+```
+def saca(self, valor):
+    self.__saldo -= valor
+
+def transfere(self, valor, destino):
+    self.saca(valor)
+    destino.deposita(valor)
+```
+
+Se analisarmos o `saca()`, veremos que ele tem alguns problemas. A conta do `Nico` tem um saldo de `55.5` e um limite de `1000.0`. Qual o valor máximo de saque que podemos fazer? Teoricamente, só poderíamos sacar `1055.5`. Mas é possível fazer uma **malandragem** e sacar mais: 
+
+```
+>>> conta. saca(1200.0)
+>>> conta.saldo
+-1144.5
+```
+
+O saldo negativo ultrapassou o limite de `1000.0`, ou seja, não existe uma verificação. É o que faremos a seguir.
+
+Nós queremos verificar se existe dinheiro suficiente na conta para que seja realizado o saque, ou seja, a soma do saldo com o limite, deve ser maior do que o valor que sacaremos. Para isto, usaremos `if/else` para fazer isso no método.
+
+```
+def saca(self, valor):
+    if(valor <= (self.__saldo + self.__limite)):
+        self.__saldo -= valor
+    else:
+        print("O valor {} passou o limite".format(valor))
+```
+
+No console, vamos testar o código criado, chamando o método `saca()`. 
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10c662cc0>
+
+>>> conta.saca(1200.0)
+O valor 1200.0 passou o limite
+```
+
+Agora quando tentamos sacar `1200.0`, o Python nos informa que ultrapassamos o limite. Se verificarmos o `saldo`, veremos que ele ainda é o mesmo, porque o saque não foi realizado. 
+
+Nós executamos o método `saca()` e apenas realizamos a verificação se o valor que desejamos sacar é `<=` ao valor do `saldo`. Isto deveria ficar um pouco mais expressivo no nosso código. Nós criamos uma regra simples, mas o sistema ainda ficará mais complexo, por isso, nós queremos deixar o código mais expressivo.
+
+O próximo passo será adicionar o novo método `pode_sacar()`. Em seguida, moveremos a expressão que está localizada atualmente no `if`, iremos movê-la para o `pode_sacar()`. E o `if` de `saca()` passará a ser o responsável por chamar `pode_sacar()`. 
+
+```
+def pode_sacar(self):
+    pass
+
+def saca(self, valor):
+    if(self.pode_sacar(valor)):
+        self.__saldo -= valor
+    else:
+        print("O valor {} passou o limite".format(valor))
+```
+
+Com o nosso código mais expressivo, ele se torna mais fácil de entender. Continuaremos trabalhando no método `pode_sacar()`, passando como segundo parâmetro a variável `valor_a_sacar`. Já o retorno da função será a condição que antes estava no `if`. 
+
+```
+def pode_sacar(self, valor_a_sacar):
+    return valor_a_sacar <= (self.__saldo + self.__limite)
+```
+
+Para tornar o método mais expressivo, vamos colocar a condição dentro de outra variável: 
+
+```
+def pode_sacar(self, valor_a_sacar):
+    valor_disponivel_a_sacar = self.__saldo + self.__limite
+    return valor_a_sacar <= valor_disponivel_a_sacar 
+
+def saca(self, valor):
+    if(self.pode_sacar(valor)):
+        self.__saldo -= valor
+    else:
+        print("O valor {} passou o limite".format(valor))
+```
+
+Testaremos se está tudo funcionando. 
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x110091358>
+
+>>> conta.saca(1200.0)
+O valor 1200.0 passou o limite
+>>> conta.saldo
+55.5 
+```
+
+Se tentarmos sacar `1200.0`, o valor não passará pela condição e ele retornará uma mensagem avisando isso. Para confirmarmos, pedimos o saldo e vimos que continua `55.5`. Podemos testar fazer um saque de um valor que esteja dentro da condição. 
+
+```
+>>> conta.saca(100.0)
+>>> conta.saldo
+-44.5
+```
+
+Tudo continua funcionando da mesma forma, mas agora tivemos um retorno negativo. Em seguida, vamos testar `pode_sacar()`, que tem o retorno `true` ou  `false`. 
+
+```
+>>> conta.pode_sacar(100.0)
+True
+```
+
+O método `pode_sacar()` facilita a compreensão do `if`. Porém, ele não deve ser usado desta forma. O `pode_sacar()` deve ter um aviso explícito de que o mesmo só poderá estar disponível **dentro** da classe. Precisamos alertar o desenvolvedor de que o método é privado e isso feito adicionando `__`.  
+
+```
+def __pode_sacar(self, valor_a_sacar):
+    valor_disponivel_a_sacar = self.__saldo + self.__limite
+    return valor_a_sacar <= valor_disponivel_a_sacar 
+
+def saca(self, valor):
+    if(self.__pode_sacar(valor)):
+        self.__saldo -= valor
+    else:
+        print("O valor {} passou o limite".format(valor))
+```
+
+O método `__pode_sacar()` foi criado para ser executado apenas dentro da classe, por isso, o caractere *underscore* foi adicionado dentro do `if` também.  
+
+Se tentarmos executar `pode_sacar()` diretamente no console, receberemos uma mensagem de erro. 
+
+```
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10159c898>
+>>> conta.pode_sacar(100.0)
+Traceback (most recent call last):
+  File "<input>", line 1, in <module>
+AttributeError: 'Conta' object has no attribute 'pode_sacar'
+```
+
+O método `pode_sacar` já não existe mais. Ele mudou de nome, passando a se chamar `_Conta__pode_sacar()`. Temos o nome da classe `Conta`, assim como os atributos privados. O Python permite que o método seja invocado, mas recomenda ao desenvolvedor que evite o `__pode_sacar()`, que é privado. 
+
+Assim como existem métodos privados, temos atributos que seguem a nomenclatura especial.
+
+# Métodos da classe
+
+Vamos conhecer mais um recurso oferecido pelas classes. Anteriormente, falamos sobre os métodos privados — com o uso do *underscore* (`_`), sinalizamos para o desenvolvedor quais são eles. 
+
+A seguir, imagine que estamos criando um sistema para o Banco do Brasil, no qual todas as contas baseadas nesta classe são referentes ao banco. Geralmente, cada instituição financeira tem um código associado. O código referente ao Banco do Brasil é `001`. Então, dentro do método `__init__` de `Conta`, adicionaremos mais um atributo: 
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite): 
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular
+        self.__saldo = saldo
+        self.__limite = limite
+        self.__codigo_banco = "001"
+```
+
+Criamos o atributo privado `__codigo_banco`, com o valor fixo. Quando instanciarmos um objeto, automaticamente, será inserido o código do Banco do Brasil. Para acessarmos um atributo, criaremos um método `codigo_banco()`, abaixo de `@limite.setter`. Acima do novo método, incluiremos `@property`, para que ele possa ser executado sem o parênteses. 
+
+```
+@property
+def codigo_banco(self):
+    return self.__codigo_banco
+```
+
+No console, vamos digitar:
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10d670208>
+
+>>>  conta.codigo_banco
+'001'
+```
+
+Conseguimos executar `codigo_banco` sem utilizarmos `()`. Com isso, obtivemos o retorno `001`. 
+
+Criaremos outro objeto, agora, referente ao cliente `Marco`. 
+
+```
+>>> conta = Conta(321, "Marco" 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10d43fd30>
+>>> conta.codigo_banco
+'001'
+```
+
+Novamente, teremos o mesmo retorno. Em seguida, vamos reiniciar o console e importar a `Conta`. 
+
+```
+>>> from conta import Conta
+```
+
+Neste momento, o objeto ainda não foi criado baseado na classe `Conta`. Se quisermos saber qual é o código do banco, precisamos criar o objeto primeiro. Porém, faria sentido já termos acesso ao código do banco, porque é algo comum entre as contas — uma informação que deveria estar disponível, mesmo antes da criação da conta.  O código do banco não depende do objeto. 
+
+Então, nosso próximo objetivo é acessar `codigo_banco`, sem ter o objeto criado. No momento, se tentarmos fazer isso, teremos o seguinte resultado.
+
+```
+>>> conta.codigo_banco
+<property object at 0x10db42e58>
+```
+
+Os métodos que estamos trabalhando fazem parte da classe e o objeto é representado pelo `self`. Nós queremos chamar o método `codigo_banco()`, sem a inclusão do objeto, por isso, já podemos remover o `self`:
+
+```
+@property
+def codigo_banco():
+    return self.__codigo_banco
+```
+
+Esse métodos que conseguimos chamar sem uma referência recebem o nome de  **estáticos**, porque eles fazem parte da classe. Todas as linguagens orientadas a objeto trabalham com **métodos estáticos**, mas para que eles sejam utilizados, iremos configurar os métodos. Fica inapropriado usar `property`, porque ele sempre precisa do `self`. A configuração correta será `@staticmethod`. 
+
+```
+@staticmethod
+def codigo_banco():
+    return "001"
+```
+
+Em seguida, vamos apagar o atributo `__codigo_banco` dentro do `__init__`.  
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):             
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular
+        self.__saldo = saldo
+        self.__limite = limite
+```
+
+Agora se testarmos no console, nosso código funcionará corretamente:
+
+```
+>>> from conta import Conta
+>>> Conta.codigo_banco()
+'001'
+```
+
+Observe que nenhum objeto foi criado, mas conseguimos chamar o método estático. Nós especificamos o nome da classe, e depois de acessá-la, chamamos o método.  
+
+O próximo passo será criar o passo que devolve todos os códigos dos bancos. Usaremos uma lista com o código de três bancos:
+
+```
+{'BB': '001', 'Caixa': '104', 'Bradesco':'237'}
+```
+
+Usaremos esse dicionário dentro do `codigos_bancos()`. 
+
+```
+@staticmethod
+def codigos_bancos():
+    return {'BB': '001', 'Caixa': '104', 'Bradesco':'237'}
+```
+
+Esses códigos foram adicionados apenas como exemplo, mas vocês não precisam conhecê-los. No `return` do método, incluiremos chaves e valores.
+
+```
+>>> from conta import Conta
+>>> codigos = Conta.codigos_bancos()
+>>> codigos
+{'BB': '001', 'Caixa': '104', 'Bradesco':'237'}
+```
+
+Colocamos a chamada para o método dentro de uma variável. Outra maneira de acessarmos um código específico é por meio de colchetes (**[]**): 
+
+```
+>>> codigos['BB']
+'001'
+>>> codigos['Caixa']
+'104'
+```
+
+Nosso foco está nos métodos estáticos que são da classe, e mesmo sem o objeto, conseguimos executar o método. Em algumas situações isso pode ser útil. Porém, precisamos ser cautelosos com o uso dos métodos estáticos. A ideia do mundo OO é criar objetos. Se usarmos apenas a classe `Conta`, sem ter um objeto, deixaremos de trabalhar com Orientação a Objeto.  
+
+Quando todos os objetos compartilham algo em comum, faz sentido usar esses métodos — como no exemplo em que compartilhamos todos os códigos do banco. Mas se utilizarmos apenas métodos estáticos, não utilizaremos mais objetos e nos aproximaremos do mundo procedural.
+
+Vimos alguns conceitos que podem ser praticados com os exercícios sobre métodos estáticos. Continuamos a seguir.
+
+# Python OO vs Java OO
+
+Avançamos bastante no conteúdo do curso, mas vale ressaltar que o paradigma OO não é uma exclusividade da linguagem Python. Orientação a Objetos é um dos paradigmas mais utilizados entre as linguagens de programação. 
+
+Existem linguagens que continuam sendo procedurais, como linguagem C, assim como outros paradigmas funcionais. Inclusive, em alguns casos, os dois começam a misturar. 
+
+É possível afirmar que o paradigma OO domina o mercado de desenvolvimento. 
+
+Isto significa que se você tem uma boa base de OO vista no curso de Python, também já terá aprendido sobre Java, PHP, C++,  além de outras linguagens que seguem o mesmo paradigma.
+
+Podemos perceber isso, comparando o arquivo `conta.py` e o `Conta.java`. A diferença entre os dois são os detalhes da sintaxe, mas o paradigma é o mesmo. Por exemplo, os dois terão uma classe `Conta`, que em Java está assim:
+
+```
+class Conta {
+
+    //atributos
+    private int numero;
+    private String titular;
+    private double saldo;
+    private double limite;
+
+    //construtor
+    Conta(int numero, String titular, double saldo, double limite) {
+        this.numero = numero;
+        this.titular = titular;
+        this.saldo = saldo;
+        this.limite = limite;
+    }
+}
+```
+
+Enquanto a classe no Python está: 
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite): 
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular
+        self.__saldo = saldo
+        self.__limite = limite                            
+```
+
+A diferença na sintaxe é que o primeiro usa chaves (**{}**), enquanto o segundo usa dois pontos (**:**). No Python, nós começamos com a função `__init__`, que é a função construtora. No entanto, no Java, não basta apenas adicionarmos o construtor, temos que definir os atributos antes. 
+
+Mas nas duas sintaxes temos uma função ocupando o papel de construtor. No Python, ela vai receber o nome de `__init__`, no Java, ela terá o mesmo nome da classe.
+
+> Quem tem conhecimentos sobre Java, sabe que o seu construtor também se chama `<init>`. 
+
+No entanto, a principal diferença é a parte superior no arquivo `Conta.java`, em que precisamos definir os atributos explicitamente e especificamos que eles são privados. No `conta.python`, usamos a convenção `__` para fazer o mesmo. Tanto no Python, quanto no Java, existem formas de acessar um atributo, mesmo que definindo como privado. 
+
+Se seguirmos comparando os dois arquivos, veremos que ambos têm o método `extrato()`, mas o Java não receberá `self`.
+
+```
+//metodos
+void extrato() {
+    System.out.println("Saldo de " + this.saldo)
+}
+```
+
+Mas também existe o `self` no mundo Java: `this`, que é disponibilizado implicitamente, mesmo não estando declarado.  Veremos que o uso do `.` também é correspondente, assim como os métodos privados. 
+
+Vemos em `conta.py`, que definimos as propriedades para acessar o saldo. No mundo Java, escrevemos um método para cada ação, como foi feito no `getSaldo()` de `Conta.java` — que precisa do `getTitular()`, `getNumero()` e `getLimite()`. 
+
+```
+public double getLimite() {
+    return limite;
+}
+
+public void setLimite(double limite) {
+    this.limite = limite;
+}
+
+public double getNumero() {
+    return numero;
+}
+
+public void getTitular() {
+    return titular;
+}
+
+public double getSaldo() {
+    return saldo;
+}
+```
+
+E da mesma forma como existem métodos estáticos no mundo Python, existe no mundo Java:
+
+```
+public static String codigo() {
+    return "001"
+}
+```
+
+Observe que usamos a palavra-chave `static`. Mesmo conhecendo apenas Python, conseguimos entender a lógica do código Java. Como criar um objeto baseado em uma conta Java?
+
+```
+Conta contaDoNico = new Conta(123, "Nico", 55.5, 1000.0);
+contaDoNico.deposita(100.0);
+```
+
+Nós também usamos o construtor `Conta()`, passamos os parâmetros, mas adotamos a palavra `new`. O endereço fica guardado na referência `contaDoNico`, porém, declaramos também o tipo. Mais acima, definimos cada tipo dos atributos: `int`, `String`, `double`. Em Java, ou utilizamos a tipagem estática, ou definimos o tipo da variável. 
+
+Fizemos também a chamada usando a referência `contaDoNico` para passar a função com o valor. 
+
+Perceba que quando aprendemos sobre o paradigma Orientado a Objetos, podemos aplicar o conceito em diversas linguagens, porque ele é seguido da mesma forma, mudando apenas as sintaxes específicas de cada linguagem.
+
+# Mãos na massa: Verificando o saque e métodos estáticos
+
+Na teoria, só podemos sacar um valor da nossa conta equivalente ao saldo mais o seu limite. Mas não é isso que está acontecendo atualmente, pois podemos sacar qualquer valor.
+
+## Verificando o saque
+
+Então, crie o método **pode_sacar**, que recebe o valor a ser sacado por argumento e verifica se há dinheiro suficiente na conta para o saque ser realizado, isto é, o valor do saque tem que ser menor ou igual ao saldo mais o limite da conta.
+
+E no método **saca**, faça um **if** para verificar se realmente o valor pode ser sacado da conta, se sim, o saque é feito, se não, imprima uma mensagem externando que o valor passou o limite.
+
+Por fim, como o método **pode_sacar** foi criado apenas para uma verificação interna, não faz sentido ele ser utilizado fora da classe, então torne-o **privado**.
+
+## Métodos estáticos
+
+Estamos criando contas de um único banco, o Banco do Brasil, que possui um código, o **001**. Como esse código independe da conta, faz sentido acessá-lo sem termos um objeto da classe **Conta**.
+
+Para isso, crie o **método estático codigo_banco**, que retorna o código do banco. E crie também o método estático **codigos_bancos**, que retorna um dicionário com os códigos dos bancos **BB**, **Caixa** e **Bradesco**, que são **001**, **104** e **237**, respectivamente.
+
+O código da classe **Conta** ficará assim:
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):
+        print("Construindo objeto ... {}".format(self))
+        self.__numero = numero
+        self.__titular = titular
+        self.__saldo = saldo
+        self.__limite = limite
+
+    def extrato(self):
+        print("Saldo de {} do titular {}".format(self.__saldo, self.__titular))
+
+    def deposita(self, valor):
+        self.__saldo += valor
+
+    def __pode_sacar(self, valor_a_sacar):
+        valor_disponivel_a_sacar = self.__saldo + self.__limite
+        return valor_a_sacar <= valor_disponivel_a_sacar
+
+    def saca(self, valor):
+        if(self.__pode_sacar(valor)):
+            self.__saldo -= valor
+        else:
+            print("O valor {} passou o limite".format(valor))
+
+    def transfere(self, valor, destino):
+        self.saca(valor)
+        destino.deposita(valor)
+
+    @property
+    def saldo(self):
+        return self.__saldo
+
+    @property
+    def get_titular(self):
+        return self.__titular
+
+    @property
+    def limite(self):
+        return self.__limite
+
+    @limite.setter
+    def limite(self, limite):
+        self.__limite = limite
+
+    @staticmethod
+    def codigo_banco():
+        return "001"
+
+    @staticmethod
+    def codigos_bancos():
+        return {'BB':'001', 'Caixa':'104', 'Bradesco':'237'}
+```
+
+No **Python Console**, dentro do próprio PyCharm, teste o código, crie uma conta e tente sacar um valor acima do limite mais o seu saldo, por exemplo:
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x7faf2aad4438>
+>>> conta.saca(10000)
+O valor 10000 passou o limite
+```
+
+E verifique também que o código do banco pode ser acessado diretamente da classe, sem necessidade de ter um objeto:
+
+```
+>>> from conta import Conta
+>>> Conta.codigo_banco()
+'001'
+>>> Conta.codigos_bancos()
+{'Caixa': '104', 'BB': '001', 'Bradesco': '237'}
+```
+
+# Revisão e Conclusão do curso
+
+A seguir, faremos uma revisão. Mesmo que ache estranho fazer tantas revisões, é importante que você tenha uma boa base sobre Orientações a Objeto. Falaremos em outros cursos sobre outros tópicos, como herança, composição, relacionamentos e conceitos mais avançados. 
+
+Mas com a base que desenvolvemos, aprender coisas novas será mais fácil. Vamos relembrar os pontos principais vistos no curso.
+
+Nossa motivação inicial era unir os dados e o comportamento, ou seja, juntarmos os atributos e os métodos. Tudo foi agrupado dentro de uma classe. 
+
+![diagrama da classe Conta](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/6.4_1_diagrama+da+classe+Conta.png)
+
+A classe é a menor unidade de organização no mundo OO.  Colocamos os elementos dentro, com os referentes de atributos e os diferentes métodos. Colocamos dentro da classe, tudo o que está relacionado a ela. No caso, os **atributos** relacionados com a classe `Conta` são: 
+
+> - numero
+> - titular
+> - saldo 
+> - limite
+
+Os **métodos** relacionados são: 
+
+> - extrato(self) 
+> - deposita(self, valor)
+> - saca(self, valor)
+
+Isto significa que evitaremos colocar na `Conta` o código relacionado com impostos da nota fiscal, porque as duas coisas não estão relacionadas. Seria mais apropriado criar a classe `notaFiscal` e adicionar o código relacionado. 
+
+Surge a pergunta: onde os programadores procuram as funcionalidades no seu projeto? A resposta é: na classe relacionada. Desta forma, mantemos o código organizado e separamos as responsabilidades.
+
+Vimos como escrever uma classe no mundo Python, adicionamos um construtor e, além disso, mostramos como ele é executado. Usamos o nome da classe, depois, passamos os parâmetros como vemos no conteúdo do quadro azul do diagrama:  
+
+```
+conta = Conta(123, "Nico", 55.5, 1000.0)
+conta.extrato()
+conta.deposita(100.0)
+conta.saldo
+```
+
+E o resultado será um objeto: 
+
+```
+objeto Conta
+
+numero = 123
+titular = "Nico"
+saldo = 55.5
+limite = 1000.0
+```
+
+A responsabilidade de criar o objeto fica por conta do Python. Sabemos que um espaço é alocado para representar os atributos e o resultado da execução devolve a referência. 
+
+Essa referência sabe onde está  guardado o objeto. Tendo esse endereço, podemos interagir com a classe, trabalhando com o objeto.  Ou seja, quando escrevemos `conta.extrato()` vai executar o elemento do `extrato`.  Com ele, acessaremos o objeto por meio do `self`. 
+
+Falamos também que o `self` é uma referência que sempre assume o valor da referência que fez a chamada. Por exemplo, se a referência é `conta`, o `self` será um equivalente na linha em que for utilizado: `deposita(self, valor)`. 
+
+No arquivo `conta.py`, implementamos vários métodos, como `extrato()` e `deposita()`, mostramos ainda como tornar um método privado. Ao adicionarmos os dois *uderscores* (`__`) como em `__pode_sacar()`, o desenvolvedor é alertado que só deve utilizá-lo dentro da classe `Conta`. 
+
+Criamos atributos privados usando a mesma nomenclatura, como `__numero` e `__titular`.  
+
+Os métodos podem crescer e ficar ainda maiores e mais complexos, mas para quem faz as chamadas do `deposita()`, a quantidade de linhas de um método é irrelevante. Isto ocorre, porque o código está encapsulado:
+
+```
+def deposita(self, valor): 
+    self._saldo += valor
+```
+
+Em uma conta da vida real, provavelmente, o método seria mais complexo e seria necessário adicionar verificações antes da realização do depósito.
+
+Quem usa a classe `Conta` e chama `deposita()`, usa de alto nível, sem a preocupação com os detalhes da implementação. 
+
+No curso, falamos sobre propriedades (`properties`). Quando digitávamos no console `conta.saldo`, parecia que acessávamos simplesmente um atributo, porque não usamos parênteses dos métodos. Mas por baixos dos panos, o método anotado com `@property`. Também temos *properties* que podem alterar os **setters**.
+
+Uma classe pode ter diversos objetos. Usando a analogia da receita, ela pode ter diversos elementos. Basta repetir a linha que constrói o objeto, passando os novos valores. 
+
+Se temos um novo objeto de memória, teremos uma nova referência que guardará o valor do endereço do objeto.
+
+Mostramos que é possível zerar uma referência,  com o uso do `None`. 
+
+```
+conta = None
+conta2 = None
+```
+
+Nós podemos falar que um referência não pode apontar para um objeto e se ela não aponta, guardará o valor `None`. Isto significa que o objeto criado ficou abandonado, porque a conta estava apontando para o objeto, porém ela foi zerada. Por isso, o objeto ficou perdido. Para casos como esse, o Python tem **coletor de lixo**, responsável por procurar os objetos que foram criados há muito tempo mas não são mais utilizados no projeto.
+
+Criamos uma classe com vários objetos que podem reaproveitar os métodos com as funcionalidades encapsuladas.  
+
+Trabalhamos com um diagrama de classes bem simples, que utiliza a linguagem de notação UML. Vimos que em alguns casos, os métodos não estão relacionados com o objeto. Mostramos um exemplo em que gostaríamos de usar um método antes de ter o objeto, que recebem o nome de **static method** (método estático). 
+
+No entanto, eles devem ser usados com parcimônia. O objetivo da Orientação a objetos é a criação de objetos. Se trabalhamos apenas com métodos estáticos isso não acontece. Mas é um recurso oferecido pelo Python e que pode fazer sentido. 
+
+Esclarecemos conceitos de método, atributo, como acessar os métodos e como funciona o uso do `self` e os atributos privados. Falamos sobre encapsulamento e coesão. Vimos conceitos fundamentais do Paradigma Orientado a Objeto. 
+
+No próximo curso, iremos além. Serão apresentadas as peças que faltam do mundo OO. Falaremos sobre **associações** entre classes e mostraremos como funciona a **herança** no Python. Abordaremos também conceitos como agregação e composição. Entenderemos quando é mais apropriado utilizar cada tipo de relacionamento. 
+
+Outro ponto forte será o **tratamento de erro**, veremos como nossa aplicação deve se comportar quando acontece algo inesperado, como devem se comportar as ações do código. Mostraremos como descobrir onde está o problema e depurar a aplicação. Tudo isso será apresentado passo a passo. 
+
+Temos um prato cheio para o próximo curso, além de tópicos que podemos incrementar no mundo Orientado a Objetos, inclusive, indo além dele. 
+
+Você está convidado a continuar na nossa jornada nesta viagem pela Orientação a Objeto. Agradeço que tenha chegado até aqui e te espero no próximo curso.
+
+# Para saber mais: Atributo estático
+
+Conhecemos nessa aula os métodos estáticos que podem ser chamados a partir da classe, sem ter um objeto criado. No exemplo abaixo criamos uma classe `Circulo` que possui um método estático `obter_pi()`:
+
+```
+class Circulo:
+
+    @staticmethod
+    def obter_pi():
+        return 3.14 
+```
+
+E agora podemos usar esse método estático a partir da classe:
+
+```
+Circulo.obter_pi()
+3.14
+```
+
+Repare que o método existe apenas para devolver o valor do `PI`. Nada errado com isso, mas já que usamos um valor simples não bastaria usar um **atributo** simples? Em outras palavras, será que é preciso criar um método? A resposta é não pois podemos usar um atributo da classe. Veja como é simples:
+
+```
+class Circulo:
+
+    PI = 3.14
+```
+
+Repare que não usamos `self` e o atributo nem foi definido dentro do `__init__`. O atributo faz parte da classe, ou seja, é um atributo estático que pode ser usado sem ter criado um objeto. Veja como fica simples:
+
+```
+Circulo.PI
+3.14
+```
+
+# E agora?
+
+Nesse curso apresentamos os fundamentos do paradigma da *Orientação a Objetos*. Vimos como definir classes e quais são os membros delas como *atributos*, *métodos* e *construtores*. Aprendemos que as classes servem como planta para criar objetos e os métodos encapsulam a implementação. 
+
+A notícia boa é que não chegamos ao fim desse paradigma poderoso e existem ainda tópicos mais avançados como *herança*, *polimorfismo*, *duck typing* entre outros assuntos da Orientação a Objetos.
+
+Convido você a assistir o próximo curso que fala justamente sobre esses tópicos. Você aplicará esses novos recursos dentro de tudo que você aprendeu nesse curso. Espero que você tenha gostado desse curso e peço para avaliar para dar um feedback para gente.
+
+Muito obrigado, Nico :)
+
+# Arquivos do projeto atual
+
+No link abaixo, você encontra o projeto até o momento atual do curso.
+
+<https://github.com/alura-cursos/Curso-Python-3-Introdu-o-a-Orienta-o-a-objetos/archive/capitulo6.zip>

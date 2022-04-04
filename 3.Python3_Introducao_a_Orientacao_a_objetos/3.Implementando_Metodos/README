@@ -1,0 +1,275 @@
+# Usando métodos
+
+Nós avançamos bastante no conteúdo e já definimos a função construtora `__init__`. Em algumas linguagens (como Java), esta função recebe o nome de **construtor**. O Python não se enquadra neste caso, porque uma função construtora não é um equivalente exato do método construtor.
+
+É importante ter definido os atributos e suas principais características, o que mostramos como fazer. Agora falta adicionar o que um objeto `Conta` pode fazer. 
+
+De acordo com `teste.py`, definimos que podemos: depositar, sacar e tirar extrato. 
+
+```
+def cria_conta(numero, titular, saldo, limite):
+    conta = {"numero": numero, "titular": titular, "saldo": saldo, "limite": limite}
+
+def saca(conta,valor):
+    conta["saldo"] -= valor
+
+def extrato(conta):
+    print("Saldo é {}".format(conta["saldo"]))
+```
+
+Estas são as funções relacionadas com uma conta, que nas linguagens Orientadas a Objetos são nomeadas como métodos. Ou seja, os métodos são referentes às ações que um objeto sabe fazer. Onde eles serão colocados? Na **classe**, desta forma, sempre adicionaremos elementos relacionados à conta na classe `Conta`. 
+
+Primeiramente, adicionaremos uma nova função na classe. Neste caso, temos liberdade de usar o termo "função", mas ela não tem uma utilidade específica como `__init__`. Incluiremos a função `extrato`, que receberá a referência `self` do próprio editor porque iremos usá-lo para imprimir o saldo do titular, incluindo sempre a função `format()` dentro do `print()`.
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):
+        print("Construindo objeto ... {}".format(self))
+        self.numero = numero
+        self.titular = titular
+        self.saldo = saldo
+        self.limite = limite
+
+    def extrato(self):
+        print("Saldo {} do titular {}".format(self.saldo, self.titular))
+```
+
+O saldo está no objeto, para alcançá-lo, usamos a referência que sabe onde ele está. No caso, usaremos o `self` como referência.  
+
+Em seguida, criaremos a conta do titular `Nico` no console. 
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x105c24cf8>
+```
+
+Porém, se executarmos apenas `extrato()` no console, receberemos uma mensagem de erro, informando que `extrato` não existe. Isso aconteceu, porque o Python não sabe quais objetos queremos utilizar. 
+
+O próximo passo será criar o objeto `conta2`, que receberá novos atributos. Ou seja, temos dois objetos em uma mesma classe.  
+
+```
+>>> from conta import Conta
+>>> conta2 = Conta(321, "Marco", 100.0, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x109fdff60>
+```
+
+Para chamarmos `extrato()`, especificaremos de qual é o objeto que queremos os dados referentes ao extrato. Esta é uma diferença da abordagem procedural para OO. 
+
+Dentro da função `__init__()`, usamos `self` seguido do `.` para acessar o objeto, como em `self.numero = numero`. Faremos o mesmo para acessar `extrato`, que será antecedido pela referência. 
+
+```
+>>> conta.extrato()
+Saldo 55.5 do titular Nico
+```
+
+Ao executarmos esta linha, o Python entenderá que a referência `conta` aponta para o objeto `Conta`, baseado na classe homônima. O retorno será a mensagem `Saldo 55.5 do titular Nico`. Como usamos a referência, ele encontrou a referência e imprimiu o valor do saldo e o titular. Podemos fazer o mesmo com o outro objeto. 
+
+```
+>>> conta2.extrato()
+Saldo 100.0 do titular Marco
+```
+
+O Python nos retornou o valor da referência. Conseguimos adicionar o primeiro método dentro da classe `Conta`. No `teste.py`, onde seguimos a programação procedural, criamos `deposita` e `saca`. Iremos adicionar os dois métodos em `conta.py`, que receberam automaticamente a variável `self`, lembrando que `deposita()` deve agregar um valor ao saldo, por isso, além de `self`, receberemos `valor` como parâmetro. 
+
+Usaremos o valor para modificar o saldo do objeto, utilizando a referência que sabe onde está o objeto, e acessando o saldo deste, no qual incrementamos um valor. O método `saca()` é bastante semelhante, com a diferença que ele vai subtrair um valor. 
+
+```
+def extrato(self):
+    print("Saldo de {} do titular {}".format(self.saldo, self.titular))
+
+def deposita(self, valor):
+    self.saldo += valor
+
+def saca(self, valor):
+    self.saldo -= valor
+```
+
+A seguir criaremos um novo objeto no console e chamaremos o método `extrato()`: 
+
+```
+>>> from conta import Conta 
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x10db29e80>
+>>> conta.extrato()
+Saldo de 55.5 do titular Nico
+```
+
+Em seguida, será a vez de invocar o método `deposita()`. No caso, depositaremos `15` reais.
+
+```
+>>> conta.deposita(15.0)
+```
+
+Se executarmos, não receberemos uma mensagem de erro. Para testar se tudo saiu bem, vamos pedir o extrato novamente:
+
+```
+>>> conta.deposita(15.0)
+>>> conta.extrato()
+Saldo de 70.5 do titular Nico
+```
+
+Agora o saldo da conta tem `70.5` reais. Vamos experimentar usar o método `saca()`.
+
+```
+>>> conta.saca(10.0)
+>>> conta.extrato()
+Saldo de 60.5 do titular Nico
+```
+
+O saldo tem o valor `60.5`. Conseguimos sacar e manipular o saldo, além de imprimirmos o valor atualizado do objeto, com o método `extrato()`. 
+
+Observe que quem utiliza o objeto se comunica com ele por meio da referência `conta`, mas não sabemos como funciona o método `extrato()`, por exemplo, porque a função está encapsulada. 
+
+Em uma aplicação do mundo real, os métodos serão mais complexos. A função `saca()` deveria, por exemplo, verificar o limite. Mas ao executarmos `saca()`, é irrelevante a complexidade da funcionalidade, porque ela ficou encapsulada dentro do método. O uso de encapsulamentos é uma característica da Orientação a Objetos.
+
+A classe possui todas as informações, como os atributos e funcionalidades da conta que, certamente em um sistema real, serão numerosas. 
+
+Vimos por que criamos a classe, mostramos como criar o objeto por meio da função construtora `__init__()` e definir os atributos dentro dela, além dos métodos e funcionalidades que o objeto deve ter. Aprendemos também como chamar os métodos usando a referência. 
+
+Nós já temos uma base de conhecimento para praticar com os exercícios.
+
+# Revisão do conteúdo
+
+> A seguir, temos uma breve revisão. Por isso, se você considera que aprendeu todo o conteúdo visto até agora, pode ir para o próximo vídeo. 
+
+O conteúdo visto neste curso pode ser aplicado para Java, C#, PHP, Ruby ou qualquer outra linguagem Orientada a Objeto.
+
+![diagrama da classe Conta em UML](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.3_1_diagrama+da+classe+Conta+em+UML.png)
+
+O diagrama da classe `Conta` contém novos dados: os métodos `extrato()`, `deposita()`, `saca()` foram incluídos juntos com seus parâmetros. Normalmente, não incluímos a função construtora `__init__`, considerando que ela é chamada de forma implícita. 
+
+Depois, criamos a classe `Conta`, usamos parâmetros, dentro da referência `conta` — como vemos na segunda parte do diagrama. O resultado é o objeto `Conta` criado em memória, com os parâmetros passados para a função construtora, como é ilustrado na parte verde do diagrama. 
+
+![diagrama de classe com tres partes](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.3_2_diagrama+de+classe+com+novas+partes.png)
+
+A referência `conta` é devolvida na execução, em que é retornado o endereço dentro de `conta`. 
+
+![referencia conta conectada com o objeto Conta](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.3_3_referencia+conta+conectada+com+objeto+Conta.png)
+
+Quando falamos anteriormente sobre **atributos**, mostramos que as referências são utilizadas para acessar o objeto e imprimir um valor.  Vimos que o método `extrato()` pode ser utilizado para impressão de valores, como em `conta.extrato()`. Desta vez, a referência foi usada para a chamada do método, assim o objeto será passado automaticamente. 
+
+![self conectado com objeto](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.3_4_self+conectado+com+objeto.png)
+
+Neste caso, a variável `self` e `conta` serão equivalentes. Ou seja, `self` também sabe onde se encontra o objeto, por isso, dentro do método `extrato()` podemos implementar a maneira de como os dados serão impressos. Quando a função for chamada no console, uma mensagem com o valor do saldo será impressa na saída. 
+
+![quarta parte com o retorno do metodo extrato](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.3_5_quarta+parte+do+diagrama+com+o+retorno+do+metodo+extrato.png)
+
+Simularemos no diagrama a criação do segundo objeto. Novamente, o endereço será guardado dentro da referência do objeto. Agora, a variável `conta2` vai apontar para `Conta` com os dados do titular `Marco`, sendo possível invocar o método `extrato()`, que retornará os valores dos atributos relacionados a este objeto. 
+
+Novamente, teremos a variável `self`, mas dessa vez, ela apontará para o segundo objeto. Isto significa que, dependendo da referência utilizada, o `self` apontará para objetos distintos. 
+
+Na parte amarela do diagrama, em que vemos o retorno do método `extrato()`, veremos duas mensagens:
+
+```
+Saldo de 55.5 do titular Nico
+Saldo de 100.0 do titular Marco
+```
+
+![diagrama com o saldo referente a conta2](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.5_5_diagrama+UML+com+nova+referencia+2.png)
+
+É útil criarmos esses desenhos incluindo as referências utilizadas no código, nós faremos mais isso adiante. Mais adiante, nos aprofundaremos no assunto encapsulamento.
+
+# None e Coletor de lixo
+
+Vamos falar mais sobre os conceitos fundamentais como "referência" e "objeto". Criamos um novo diagrama: 
+
+![diagrama com a referencia conta e o objeto Conta](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.5_1_+diagrama+com+a+referencia++conta+e+objeto+Conta.png)
+
+No desenho, mostramos a criação da conta e o objeto em memória. Ao chamarmos a função construtora `__init__`, por baixo dos panos, será gerado o objeto. Em seguida, duplicaremos as linhas inclusas nas duas partes do objeto, desta forma representaremos que temos duas contas e dois objetos, no qual estarão presentes os mesmos dados. 
+
+![objetos com dados iguais](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.5_2_dois+objetos+com+dados+iguais.png)
+
+Neste caso, teremos dois objetos que  representam a conta `123`. Na realidade, só podemos ter uma conta com esse número, mas em um sistema, se chamamos duas vezes o mesmo construtor, teremos dois objetos. Além disso, observem que, com o objeto criado, atribuímos o endereço à mesma referência. Desta forma, a referência `conta` relacionada com um objeto apontará especificamente para o segundo. 
+
+![conta apontando para o segundo objeto](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.5_3_conta+com+a+flecha+apontando+para+o+segundo+objeto.png)
+
+A referência consegue encontrar o objeto criado mais recentemente. Porém, como faremos para alcançar o primeiro objeto? Ficamos sem referência para ele e, de fato, não temos como alcançá-lo. O primeiro objeto permanecerá ocupando espaço, mas sem ser acessado. 
+
+Fazendo uma analogia, seria como se anotássemos um endereço específico em um papel e ao jogarmos essa anotação fora, o local será esquecido e nunca mais localizado.
+
+Quando criamos um programa, são gerados diversos objetos que em algum momento serão abandonados. Dentro da máquina virtual, na execução do Python, existe um processo que procura esses objetos esquecidos. Os itens inutilizados serão apagados e o espaço livre em memória será reutilizado. No caso,  o responsável por jogar fora esses objetos em desuso é o **coletor de lixo** (*garbage collector*, em inglês) do Python.
+
+Em seguida, criaremos uma terceira variável, que receberá o nome de `outraRef`. Será para ela que atribuiremos o valor da referência `conta`. 
+
+```
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+
+>>> outraRef = conta
+```
+
+O valor da referência `conta` fica com a referência `outraRef`. Usando novamente a analogia do endereço anotado em um papel, é como se tivéssemos feito uma fotocópia do papel. Em linguagem UML, o diagrama ficaria assim:
+
+![diagrama UML com outraRef](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.5_5_diagrama+UML+com+nova+referencia+2.png)
+
+Observem que temos uma nova referência, no entanto, não criamos um novo objeto. Nós podemos ter diversas referências apontando para um mesmo objeto. Neste caso, podemos usar tanto `outroRef` ou `conta` para acessar um atributo. 
+
+O que acontece se quisermos desfazer uma referência, por exemplo, desreferenciar `outraRef`? Para isto, podemos usar a palavra especial `None`:
+
+```
+>>> outraRef = None
+```
+
+Nosso diagrama ficará assim: 
+
+![diagrama com outraRef none](https://s3.amazonaws.com/caelum-online-public/693-python-oo/Transcri%C3%A7%C3%A3o/3.5_6_diagrama+com+outraref+none.png)
+
+Com o uso do `None`, indicamos que a variável já não aponta para um objeto. A palavra `None` é equivalente a palavra-chave `null` nas linguagens C# ou Java. Nós também removemos a seta que apontava a referência `outraRef` para o objeto `Conta`, porque já não é possível acessá-lo usando a referência `outraRef`.
+
+**Revisando:** Vimos que os objetos abandonados são removidos pelo coletor de lixo do Python e que podemos ter mais de uma referência apontando para o mesmo objeto. Inclusive, podemos desfazer a referência para um objeto, como fizemos com `outraRef`.
+
+Estamos criando uma base sólida de conceitos, mas falta vermos muita coisa.
+
+
+
+# Mãos na massa: Definindo o comportamento da classe
+
+Com a classe criada, falta definir o seu **comportamento**, criando **métodos**, para sacar, depositar e imprimir o extrato da conta.
+
+Para tal, siga os passos abaixo:
+
+**1 - ** Crie o método **extrato**, que recebe como argumento uma referência do próprio objeto. Esse método imprimirá o saldo da conta.
+
+**2 - ** Crie o método **deposita**, que recebe como argumento uma referência do próprio objeto e o **valor**. Esse método adicionará o valor ao saldo da conta.
+
+**3 - ** Crie o método **saca**, que recebe como argumento uma referência do próprio objeto e o **valor**. Esse método subtrairá o valor do saldo da conta.
+
+### Opinião do instrutor			
+
+O código da classe **Conta** ficará assim:
+
+```
+class Conta:
+
+    def __init__(self, numero, titular, saldo, limite):
+        print("Construindo objeto ... {}".format(self))
+        self.numero = numero
+        self.titular = titular
+        self.saldo = saldo
+        self.limite = limite
+
+    def extrato(self):
+        print("Saldo de {} do titular {}".format(self.saldo, self.titular))
+
+    def deposita(self, valor):
+        self.saldo += valor
+
+    def saca(self, valor):
+        self.saldo -= valor
+```
+
+No **Python Console**, dentro do próprio PyCharm, teste o código, crie uma conta, deposite um valor, visualize o extrato com o saldo incrementado, saque um valor e visualize o extrato com o saldo decrementado, por exemplo:
+
+```
+>>> from conta import Conta
+>>> conta = Conta(123, "Nico", 55.5, 1000.0)
+Construindo objeto ... <conta.Conta object at 0x7fa29f59a518>
+>>> conta.deposita(300.0)
+>>> conta.extrato()
+Saldo de 355.5 do titular Nico
+>>> conta.saca(100.0)
+>>> conta.extrato()
+Saldo de 255.5 do titular Nico
+```
